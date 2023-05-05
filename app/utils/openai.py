@@ -24,7 +24,7 @@ class OpenAi:
             return {"error": "Something went wrong."}
 
     def riddle_generate(self):
-        content = """
+        prompt = """
         You are a riddle generator AI. Generate a riddle, some hints and its answer.
 
         The output should be in a JSON format and nothing else. Eg:
@@ -36,7 +36,7 @@ class OpenAi:
             messages=[
                 {
                     "role": "system",
-                    "content": content,
+                    "content": prompt,
                 },
             ],
         )
@@ -47,13 +47,16 @@ class OpenAi:
         logger.info(
             f"Riddle verification Riddle: {riddle} | Answer: {answer} | user answer: {user_answer}"
         )
-        content = """
+        prompt = """
         You are a riddle answer checker AI. You are given with a riddle, its answer and a user answer.
         Check if the user answer is correct or not.
 
         The output should be in a JSON format. No thing else and no explanation.
+        If the answer is correct, message should be empty. If the answer is wrong, give the accuracy score.
+        Like: You are nearly correct, think better etc
         Eg:
-        {{"correct": true, "accuracy": 85}}
+        {{"correct": true, "message": ""}}
+        {{"correct": false, "message": "<conclusion>"}}
 
         Given riddle: {riddle}
         Given answer: {answer}
@@ -68,7 +71,7 @@ class OpenAi:
             messages=[
                 {
                     "role": "system",
-                    "content": content,
+                    "content": prompt,
                 },
             ],
         )

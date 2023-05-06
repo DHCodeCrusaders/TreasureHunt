@@ -14,6 +14,11 @@ def records_to_json(records):
     """
     Convert SQLAlchemy records to JSON
     """
+    is_single = False
+    if not isinstance(records, list):
+        records = [records]
+        is_single = True
+
     data = [
         {
             key: value
@@ -23,4 +28,6 @@ def records_to_json(records):
         for record in records
     ]
 
+    if is_single:
+        data = data[0]
     return data

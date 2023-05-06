@@ -1,16 +1,62 @@
+from datetime import datetime
+
 from flask import Blueprint
 
-from app.database.schema import Hunts, db_session
+from app.database.schema import Hunts, Treasures, db_session
 from app.utils.decorators import login_required
 from app.utils.utils import build_response, records_to_json
 
 hunt_blueprint = Blueprint("hunts", __name__)
 
 
+@hunt_blueprint.route("/<int:hunt_id>", methods=["GET"])
+@login_required
+def hunt_details(hunt_id):
+    now = datetime.utcnow()
+    hunt = db_session.query(Hunts).filter(Hunts.hunt_id == hunt_id).first()
+
+    if not hunt:
+        return build_response(message="Hunt not found"), 404
+
+    if hunt.start_date < now:
+        hunt.has_started = True
+    else:
+        hunt.has_started = False
+
+    treasures_data = []
+    if hunt.has_started:
+        treasures = (
+            db_session.query(
+                Treasures.treasure_id,
+                Treasures.title,
+                Treasures.description,
+                Treasures.photo_url,
+            )
+            .filter(Treasures.hunt_id == hunt_id)
+            .all()
+        )
+
+        treasures_data = records_to_json(treasures)
+
+    data = records_to_json(hunt)
+    data["treasures"] = treasures_data
+
+    response = build_response(data=data)
+
+    return response, 200
+
+
 @hunt_blueprint.route("/list", methods=["GET"])
 @login_required
 def get_hunts():
-    hunts = db_session.query(Hunts).all()
+    now = datetime.utcnow()
+    hunts = db_session.query(Hunts).filter(Hunts.end_date > now).all()
+
+    for hunt in hunts:
+        hunt.has_started = False
+        if hunt.start_date < now:
+            hunt.has_started = True
+
     data = records_to_json(hunts)
 
     response = build_response(data=data)

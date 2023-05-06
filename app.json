@@ -1,0 +1,36 @@
+{
+    "name": "TreasureHunt",
+    "description": "Treasure Hunt API for LoyalBart",
+    "stack": "container",
+    "keywords": [
+      "treasure"
+    ],
+    "website": "https://github.com/DHCodeCrusaders/TreasureHunt",
+    "repository": "https://github.com/DHCodeCrusaders/TreasureHunt",
+    "env": {
+        "OPENAI_TOKEN": {
+            "description": "OPEN AI Token for Riddle Generation",
+            "value": "",
+            "required": true
+        },
+        "DATABASE_URL": {
+            "description": "Postgres Database URL",
+            "value": "",
+            "required": true
+        },
+        "JWT_SECRET_KEY": {
+            "description": "JWT Secret Token",
+            "value": "",
+            "required": true
+        }
+    },
+    "buildpacks": [{
+        "url": "heroku/python"
+    }],
+    "formation": {
+        "worker": {
+            "quantity": 1,
+            "size": "eco"
+        }
+    }
+}

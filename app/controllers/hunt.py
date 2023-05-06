@@ -2,7 +2,7 @@ from datetime import datetime
 
 from flask import Blueprint
 
-from app.database.schema import Hunts, Treasures, db_session
+from app.database.schema import Hunts, Treasures, Winners, db_session
 from app.utils.decorators import login_required
 from app.utils.utils import build_response, records_to_json
 
@@ -48,10 +48,20 @@ def hunt_details(hunt_id):
         )
 
         for treasure in treasures:
+
+            winner = (
+                db_session.query(Winners)
+                .filter(Winners.treasure_id == treasure.treasure_id)
+                .first()
+            )
+
+            is_claimed = True if winner else False
+
             treasures_data = {
                 "title": treasure.title,
                 "description": treasure.description,
                 "photo_url": treasure.photo_url,
+                "is_claimed": is_claimed,
             }
 
     data = records_to_json(hunt)

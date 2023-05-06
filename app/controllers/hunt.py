@@ -57,12 +57,14 @@ def hunt_details(hunt_id):
 
             is_claimed = True if winner else False
 
-            treasures_data = {
-                "title": treasure.title,
-                "description": treasure.description,
-                "photo_url": treasure.photo_url,
-                "is_claimed": is_claimed,
-            }
+            treasures_data.append(
+                {
+                    "title": treasure.title,
+                    "description": treasure.description,
+                    "photo_url": treasure.photo_url,
+                    "is_claimed": is_claimed,
+                }
+            )
 
     data = records_to_json(hunt)
     data["treasures"] = treasures_data

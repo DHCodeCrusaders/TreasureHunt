@@ -44,17 +44,15 @@ def hunt_details(hunt_id):
     treasures_data = []
     if hunt.has_started:
         treasures = (
-            db_session.query(
-                Treasures.treasure_id,
-                Treasures.title,
-                Treasures.description,
-                Treasures.photo_url,
-            )
-            .filter(Treasures.hunt_id == hunt_id)
-            .all()
+            db_session.query(Treasures).filter(Treasures.hunt_id == hunt_id).all()
         )
 
-        treasures_data = records_to_json(treasures)
+        for treasure in treasures:
+            treasures_data = {
+                "title": treasure.title,
+                "description": treasure.description,
+                "photo_url": treasure.photo_url,
+            }
 
     data = records_to_json(hunt)
     data["treasures"] = treasures_data

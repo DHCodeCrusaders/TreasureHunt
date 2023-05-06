@@ -1,8 +1,6 @@
-from datetime import datetime
+from flask import Blueprint, g, request
 
-from flask import Blueprint, request
-
-from app.database.schema import Hunts, Riddles, Treasures, Winners, db_session
+from app.database.schema import Riddles, Treasures, Winners, db_session
 from app.utils.decorators import login_required
 from app.utils.openai import gpt
 from app.utils.utils import build_response, records_to_json
@@ -10,46 +8,41 @@ from app.utils.utils import build_response, records_to_json
 treasure_blueprint = Blueprint("treasures", __name__)
 
 
-@treasure_blueprint.route("/treasure/list", methods=["POST"])
+@treasure_blueprint.route("/treasure/<string:treasure_secret>", methods=["GET"])
 @login_required
-def get_treasures():
-    request_data = request.get_json()
-    hunt_id = request_data.get("hunt_id")
+def treasure_info(treasure_secret):
+    treasure = (
+        db_session.query(Treasures).filter_by(treasure_secret=treasure_secret).first()
+    )
 
-    hunt = db_session.query(Hunts).get(hunt_id)
-
-    if not hunt:
-        response = build_response(message="Hunt not found.")
-        return response, 404
-
-    if hunt.start_date > datetime.now():
-        response = build_response(message="The Hunt has not started yet.")
-        return response, 403
-
-    elif hunt.end_date < datetime.now():
-        response = build_response(message="The Hunt has already ended.")
-        return response, 403
-
-    hunts = db_session.query(Treasures).filter(Treasures.hunt_id == hunt_id).all()
-
-    data = records_to_json(hunts)
-
-    response = build_response(data=data)
-
-    return response, 200
-
-
-@treasure_blueprint.route("/treasure/<int:treasure_id>", methods=["GET"])
-@login_required
-def treasure_info(treasure_id):
-    treasure = db_session.query(Treasures).filter_by(treasure_id=treasure_id).all()
-
-    data = records_to_json(treasure)
-    if not data:
+    if not treasure:
         response = build_response(message="Treasure not found.")
         return response, 404
 
-    response = build_response(data=data[0])
+    winner = (
+        db_session.query(Winners)
+        .filter(Winners.treasure_id == treasure.treasure_id)
+        .first()
+    )
+
+    if winner:
+        response = build_response(message="This treasure has already been claimed.")
+        return response, 403
+
+    data = records_to_json(treasure)
+
+    riddle_data = (
+        db_session.query(Riddles.riddle, Riddles.hints)
+        .filter(Riddles.riddle_id == treasure.riddle_id)
+        .first()
+    )
+
+    data["riddle"] = None
+    if riddle_data:
+        riddle, hints = riddle_data
+        data["riddle"] = {"riddle": riddle, "hints": hints}
+
+    response = build_response(data=data)
 
     return response, 200
 
@@ -57,12 +50,15 @@ def treasure_info(treasure_id):
 @treasure_blueprint.route("/treasure/claim", methods=["POST"])
 @login_required
 def treasure_claim():
+    user_id = g.login_details.get("user_id")
     request_data = request.get_json()
-    treasure_id = request_data.get("treasure_id")
+    treasure_secret = request_data.get("treasure_secret")
     riddle_answer = request_data.get("riddle_answer")
 
     treasure = (
-        db_session.query(Treasures).filter(Treasures.treasure_id == treasure_id).first()
+        db_session.query(Treasures)
+        .filter(Treasures.treasure_secret == treasure_secret)
+        .first()
     )
 
     if not treasure:
@@ -94,7 +90,7 @@ def treasure_claim():
             }
             return response, 403
 
-    new_winner = Winners(treasure_id=treasure_id, user_id=123)
+    new_winner = Winners(treasure_id=treasure.treasure_id, user_id=user_id)
     db_session.add(new_winner)
     db_session.commit()
 

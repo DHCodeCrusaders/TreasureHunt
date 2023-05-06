@@ -1,4 +1,5 @@
 import functools
+from os import environ
 
 import jwt
 from flask import g, request
@@ -15,7 +16,9 @@ def login_required(func):
             return response, 401
 
         try:
-            g.login_details = jwt.decode(token, "SECRET_KEY", algorithms=["HS256"])
+            g.login_details = jwt.decode(
+                token, environ.get("JWT_SECRET_KEY"), algorithms=["HS256"]
+            )
         except jwt.InvalidTokenError:
             response = build_response(message="Token is invalid")
             return response, 401

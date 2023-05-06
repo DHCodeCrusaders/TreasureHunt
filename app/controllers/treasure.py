@@ -2,7 +2,7 @@ from datetime import datetime
 
 from flask import Blueprint, request
 
-from app.database.models import Hunts, Riddles, Treasures, Winners, db_session
+from app.database.schema import Hunts, Riddles, Treasures, Winners, db_session
 from app.utils.decorators import login_required
 from app.utils.openai import gpt
 from app.utils.utils import build_response, records_to_json

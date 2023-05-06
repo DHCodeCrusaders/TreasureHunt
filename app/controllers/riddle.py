@@ -1,6 +1,6 @@
-from flask import Blueprint, jsonify, make_response
+from flask import Blueprint
 
-from app.database.models import Riddles, db_session
+from app.database.schema import Riddles, db_session
 from app.utils.decorators import login_required
 from app.utils.openai import gpt
 from app.utils.utils import build_response

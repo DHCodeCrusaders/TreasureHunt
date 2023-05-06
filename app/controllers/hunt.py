@@ -1,6 +1,6 @@
 from flask import Blueprint
 
-from app.database.models import Hunts, db_session
+from app.database.schema import Hunts, db_session
 from app.utils.decorators import login_required
 from app.utils.utils import build_response, records_to_json
 

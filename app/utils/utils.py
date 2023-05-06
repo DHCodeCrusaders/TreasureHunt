@@ -1,4 +1,4 @@
-def build_response(message="", data=[]):
+def build_response(message="", data=None):
     """
     Base API signature
     """

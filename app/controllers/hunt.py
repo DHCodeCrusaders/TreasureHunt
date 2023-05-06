@@ -62,6 +62,7 @@ def hunt_details(hunt_id):
                     "title": treasure.title,
                     "description": treasure.description,
                     "photo_url": treasure.photo_url,
+                    "token": treasure.treasure_secret,
                     "winner_id": winner_id,
                 }
             )

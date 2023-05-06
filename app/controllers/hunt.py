@@ -55,14 +55,14 @@ def hunt_details(hunt_id):
                 .first()
             )
 
-            is_claimed = True if winner else False
+            winner_id = winner.user_id if winner else None
 
             treasures_data.append(
                 {
                     "title": treasure.title,
                     "description": treasure.description,
                     "photo_url": treasure.photo_url,
-                    "is_claimed": is_claimed,
+                    "winner_id": winner_id,
                 }
             )
 

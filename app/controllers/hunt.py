@@ -9,6 +9,24 @@ from app.utils.utils import build_response, records_to_json
 hunt_blueprint = Blueprint("hunts", __name__)
 
 
+@hunt_blueprint.route("/list", methods=["GET"])
+@login_required
+def get_hunts():
+    now = datetime.utcnow()
+    hunts = db_session.query(Hunts).filter(Hunts.end_date > now).all()
+
+    for hunt in hunts:
+        hunt.has_started = False
+        if hunt.start_date < now:
+            hunt.has_started = True
+
+    data = records_to_json(hunts)
+
+    response = build_response(data=data)
+
+    return response, 200
+
+
 @hunt_blueprint.route("/<int:hunt_id>", methods=["GET"])
 @login_required
 def hunt_details(hunt_id):
@@ -40,24 +58,6 @@ def hunt_details(hunt_id):
 
     data = records_to_json(hunt)
     data["treasures"] = treasures_data
-
-    response = build_response(data=data)
-
-    return response, 200
-
-
-@hunt_blueprint.route("/list", methods=["GET"])
-@login_required
-def get_hunts():
-    now = datetime.utcnow()
-    hunts = db_session.query(Hunts).filter(Hunts.end_date > now).all()
-
-    for hunt in hunts:
-        hunt.has_started = False
-        if hunt.start_date < now:
-            hunt.has_started = True
-
-    data = records_to_json(hunts)
 
     response = build_response(data=data)
 

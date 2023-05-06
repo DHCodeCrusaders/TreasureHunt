@@ -3,6 +3,7 @@ from datetime import datetime
 from flask import Blueprint, request
 
 from app.database.models import Hunts, Riddles, Treasures, Winners, db_session
+from app.utils.decorators import login_required
 from app.utils.openai import gpt
 from app.utils.utils import build_response, records_to_json
 
@@ -10,6 +11,7 @@ treasure_blueprint = Blueprint("treasures", __name__)
 
 
 @treasure_blueprint.route("/treasure/list", methods=["POST"])
+@login_required
 def get_treasures():
     request_data = request.get_json()
     hunt_id = request_data.get("hunt_id")
@@ -34,6 +36,7 @@ def get_treasures():
 
 
 @treasure_blueprint.route("/treasure/<int:treasure_id>", methods=["GET"])
+@login_required
 def treasure_info(treasure_id):
     treasure = db_session.query(Treasures).filter_by(treasure_id=treasure_id).all()
 
@@ -44,6 +47,7 @@ def treasure_info(treasure_id):
 
 
 @treasure_blueprint.route("/treasure/claim", methods=["POST"])
+@login_required
 def treasure_claim():
     request_data = request.get_json()
     treasure_id = request_data.get("treasure_id")

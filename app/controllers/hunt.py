@@ -2,7 +2,7 @@ from datetime import datetime
 
 from flask import Blueprint
 
-from app.database.schema import Hunts, Treasures, Winners, db_session
+from app.database.schema import Hunts, Riddles, Treasures, Winners, db_session
 from app.utils.decorators import login_required
 from app.utils.utils import build_response, records_to_json
 
@@ -48,6 +48,19 @@ def hunt_details(hunt_id):
         )
 
         for treasure in treasures:
+            riddle = (
+                db_session.query(Riddles)
+                .filter(Riddles.riddle_id == treasure.riddle_id)
+                .first()
+            )
+
+            if riddle:
+                riddle_data = {
+                    "riddle": riddle.riddle,
+                    "hints": riddle.hints,
+                }
+            else:
+                riddle_data = None
 
             winner = (
                 db_session.query(Winners)
@@ -64,6 +77,7 @@ def hunt_details(hunt_id):
                     "photo_url": treasure.photo_url,
                     "token": treasure.treasure_secret,
                     "winner_id": winner_id,
+                    "riddle": riddle_data,
                 }
             )
 

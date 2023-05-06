@@ -18,5 +18,12 @@ app.register_blueprint(treasure_blueprint, url_prefix=URL_PREFIX)
 app.register_blueprint(hunt_blueprint, url_prefix=URL_PREFIX)
 app.register_blueprint(riddle_blueprint, url_prefix=URL_PREFIX)
 
+
+@app.route("/")
+@app.route("/hunt")
+def test():
+    return "Welcome to Treasure Hunt API!!", 200
+
+
 if __name__ == "__main__":
     app.run()

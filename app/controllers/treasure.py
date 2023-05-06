@@ -18,6 +18,10 @@ def get_treasures():
 
     hunt = db_session.query(Hunts).get(hunt_id)
 
+    if not hunt:
+        response = build_response(message="Hunt not found.")
+        return response, 404
+
     if hunt.start_date > datetime.now():
         response = build_response(message="The Hunt has not started yet.")
         return response, 403
@@ -41,6 +45,10 @@ def treasure_info(treasure_id):
     treasure = db_session.query(Treasures).filter_by(treasure_id=treasure_id).all()
 
     data = records_to_json(treasure)
+    if not data:
+        response = build_response(message="Treasure not found.")
+        return response, 404
+
     response = build_response(data=data[0])
 
     return response, 200
@@ -56,6 +64,10 @@ def treasure_claim():
     treasure = (
         db_session.query(Treasures).filter(Treasures.treasure_id == treasure_id).first()
     )
+
+    if not treasure:
+        response = build_response(message="Treasure not found.")
+        return response, 404
 
     winner = (
         db_session.query(Winners)
